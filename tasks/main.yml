@@ -1,0 +1,44 @@
+---
+- name: Install python setup tools
+  apt: name="{{item}}" state=present
+  with_items:
+    - python-setuptools
+    - python-dev
+    - build-essential
+    - python3
+
+- name: Install pip through easy_install
+  easy_install: name=pip
+
+- name: Install virtualenv with pip
+  pip: name=virtualenv
+
+- name: Install virtualenv with pip
+  pip: name=virtualenv
+
+- name: Create 'pelican' virtualenv
+  command: virtualenv {{pelican_env}} -p python3 creates="{{pelican_env}}"
+
+- name: Create pelican-themes folder
+  file: path={{pelican_themes}} state=directory mode=0755
+
+- name: Download pelican themes from github
+  git:
+    repo: https://github.com/talaniz/pelican-clean-blog.git
+    dest: "{{pelican_themes}}/pelican-clean-blog"
+    version: master
+    force: yes
+
+- name: Create home folder to serve blog
+  file: path={{web_root}} state=directory mode=0755
+
+- name: Download my blog repo
+  git:
+    repo: "{{blog_repo}}"
+    dest: "{{web_root}}"
+    version: master
+
+- name: Install project requirements
+  pip:
+    executable: "{{pelican_env}}/bin/pip"
+    requirements: "{{web_root}}/requirements.txt"
